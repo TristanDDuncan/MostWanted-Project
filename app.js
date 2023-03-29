@@ -48,13 +48,35 @@ function searchPeopleDataSet(people) {
 
     return results;
 }
-
+debugger
 function searchByTraits(people){
-    const traitsToSearch = prompt('Please enter the eye color of the person you are searching for.')
-    const traitsResults = people.filter(person => person.eyeColor === traitsToSearch)
-    return traitsResults;
-    
+let searchCriteria = [];
+let maxCriteria = 5;
+let continueSearch = true;
+while(searchCriteria.length < maxCriteria && continueSearch){
+    const trait = prompt(`Enter trait ${searchCriteria.length + 1}:eyeColor,weight,height,gender,occupation`);
+    const validTraits = ["eyeColor","height","gender","occupation","weight"];
+    if(!validTraits.includes(trait)){
+        alert("Invalid Trait");
+        return true;
+    }
+    const value = prompt(`Enter value for trait ${trait}`);
+    searchCriteria.push({trait,value});
+    continueSearch = confirm("Do you want to continue searching?");
+    let filteredPeople = people;
+    for(const criteria of searchCriteria){
+        filteredPeople = filteredPeople.filter(person => person[criteria.trait] == criteria.value);
+        
+    }displayPeople("Search Results", filteredPeople)
 }
+}
+
+// function searchByTraits(people){
+//     const traitsToSearch = prompt('Please enter the eye color of the person you are searching for.')
+//     const traitsResults = people.filter(person => person.eyeColor === traitsToSearch)
+//     return traitsResults;
+
+// }
 
 function searchById(people) {
     const idToSearchForString = prompt('Please enter the id of the person you are searching for.');
@@ -79,17 +101,17 @@ function mainMenu(person, people) {
 
     switch (mainMenuUserActionChoice) {
         case "info":
-                console.log(`${person.id}`);
-                console.log(`${person.firstName}`);
-                console.log(`${person.lastName}`);
-                console.log(`${person.gender}`);
-                console.log(`${person.dob}`);
-                console.log(`${person.height}`);
-                console.log(`${person.weight}`);
-                console.log(`${person.eyeColor}`);
-                console.log(`${person.occupation}`);
-                console.log(`${person.parents}`);
-                console.log(`${person.currentSpouse}`)
+                alert(`${person.id}`);
+                alert(`${person.firstName}`);
+                alert(`${person.lastName}`);
+                alert(`${person.gender}`);
+                alert(`${person.dob}`);
+                alert(`${person.height}`);
+                alert(`${person.weight}`);
+                alert(`${person.eyeColor}`);
+                alert(`${person.occupation}`);
+                alert(`${person.parents}`);
+                alert(`${person.currentSpouse}`)
     
         
             break;
@@ -109,14 +131,26 @@ function mainMenu(person, people) {
 }
 
 function findPersonDescendants(person, people){
-    let children = people.filter(p => person.parents.includes(p.id))
-    displayPeople("Parents", children)
+    let children = people.filter(p => p.parents.includes(person.id))
     let grandchildren = [];
-    children.filter(c => {
-        grandchildren.push(people.filter(p => p.parents.includes(c.id)))
+    for (let i = 0; i < children.length; i++){
+        let child = children[i];
+        grandchildren.concat(people.filter(p => p.parents.includes(child.id)))
+    }
     displayPeople("Children", children);
-    displayPeople("Grandchildren", grandchildren)})
-}    
+    for(let i = 0; i < children.length; i++){
+        let grandchildren = people.filter(p => p.parents.includes(children[i].id));
+        if(grandchildren.length > 0){
+            displayPeople("Grandchildren", grandchildren);
+            descendants = descendants.concat(grandchildren);
+            descendants = descendants.concat(findDescendants(grandchildren, people));
+        }
+    }
+    
+
+    displayPeople("Grandchildren", grandchildren);
+}
+    
 function findFamily(people, person){
     let spouse = people.filter( p => p.id === person.currentSpouse)
     displayPeople("Spouse", spouse)
